@@ -64,12 +64,13 @@ jobs:
 
       - name: Substitute variables in deployment.yaml
         run: |
-          IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
+          IMAGE_TAG=${{ github.sha }}
+          echo "Image tag: $IMAGE_TAG"
           envsubst < deployment.yaml > deployment_temp.yaml
         env:
           IMAGE_TAG: ${{ needs.build.outputs.IMAGE_TAG }}
 
       - name: Deploy
         run: |
-          kubectl apply -f deployment.yaml
+          kubectl apply -f deployment_temp.yaml
           kubectl apply -f service.yaml
