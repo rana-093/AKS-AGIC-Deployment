@@ -65,7 +65,7 @@ jobs:
       - name: Substitute variables in deployment.yaml
         run: |
           IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
-          envsubst < k8s/deployment.yaml > k8s/deployment_temp.yaml
+          envsubst < deployment.yaml > deployment_temp.yaml
         env:
           IMAGE_TAG: ${{ needs.build.outputs.IMAGE_TAG }}
 
