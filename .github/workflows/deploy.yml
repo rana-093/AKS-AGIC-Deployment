@@ -9,7 +9,6 @@ env:
   CLUSTER_NAME: aks-demo
   RESOURCE_GROUP: k8s
   NAMESPACE: default
-  IMAGE_TAG: latest
 
 jobs:
   build:
