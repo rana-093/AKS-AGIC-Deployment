@@ -38,8 +38,11 @@ jobs:
 
       - name: Build image and push to ACR
         run: |
-          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${{ env.IMAGE_TAG }}
-          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${{ env.IMAGE_TAG }}
+          IMAGE_TAG=${{ github.sha }}
+          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${IMAGE_TAG}
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${IMAGE_TAG}
+        env:
+         IMAGE_TAG: ${{ github.sha }}
 
       - uses: azure/login@v1
         with:
@@ -59,8 +62,14 @@ jobs:
           secret-name: registry-connection
           namespace: ${{ env.NAMESPACE }}
 
+      - name: Substitute variables in deployment.yaml
+        run: |
+          IMAGE_TAG=${{ needs.build.outputs.IMAGE_TAG }}
+          envsubst < k8s/deployment.yaml > k8s/deployment_temp.yaml
+        env:
+          IMAGE_TAG: ${{ needs.build.outputs.IMAGE_TAG }}
+
       - name: Deploy
         run: |
           kubectl apply -f deployment.yaml
           kubectl apply -f service.yaml
-          kubectl apply -f ingress.yaml

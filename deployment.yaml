@@ -14,7 +14,7 @@ spec:
     spec:
       containers:
       - name: express-app
-        image: seliseassesment3.azurecr.io/nodeapp:latest
+        image: seliseassesment3.azurecr.io/nodeapp:${IMAGE_TAG}
         imagePullPolicy: Always
         ports:
         - containerPort: 3000

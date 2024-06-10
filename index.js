@@ -5,6 +5,10 @@ const STORAGE_ACCOUNT_NAME = 'blobformasud';
 const CONTAINER_NAME = 'filestorage';
 const BLOB_URL = `https://${STORAGE_ACCOUNT_NAME}.blob.core.windows.net/${CONTAINER_NAME}/`;
 
+app.get('/', (req, res, next) => {
+    res.json({"message": "I am alive folks!"});
+});
+
 app.get("/api", (req, res, next) => {
     res.json({"message": "Hello, World!"});
 });
