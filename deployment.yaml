@@ -14,6 +14,14 @@ spec:
     spec:
       containers:
       - name: express-app
-        image: seliseassesment3.azurecr.io/nodeapp:v1
+        image: seliseassesment3.azurecr.io/nodeapp:latest
+        imagePullPolicy: Always
         ports:
         - containerPort: 3000
+        resources:
+            requests:
+              cpu: "150m"
+            limits:
+              cpu: "300m"
+      imagePullSecrets:
+      - name: registry-connection

@@ -1,0 +1,68 @@
+name: AKS Deployment
+
+on:
+  push:
+    branches: ["main"]
+
+env:
+  REGISTRY_NAME: seliseassesment3
+  CLUSTER_NAME: aks-demo
+  RESOURCE_GROUP: k8s
+  NAMESPACE: default
+  IMAGE_TAG: latest
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: checkout code
+        uses: actions/checkout@v4
+
+      - name: Install kubectl
+        id: install-kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: "v1.28.0"
+
+      - name: Set Node.js version
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+
+      - name: login to ACR
+        uses: azure/docker-login@v1
+        with:
+          login-server: ${{ env.REGISTRY_NAME }}.azurecr.io
+          username: ${{ secrets.REGISTRY_USERNAME }}
+          password: ${{ secrets.REGISTRY_PASSWORD }}
+
+      - name: Build image and push to ACR
+        run: |
+          docker build . -t ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${{ env.IMAGE_TAG }}
+          docker push ${{ env.REGISTRY_NAME }}.azurecr.io/nodeapp:${{ env.IMAGE_TAG }}
+
+      - uses: azure/login@v1
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+
+      - uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ env.RESOURCE_GROUP }}
+          cluster-name: ${{ env.CLUSTER_NAME }}
+
+      - name: Create Secret
+        uses: azure/k8s-create-secret@v1
+        with:
+          container-registry-url: ${{ env.REGISTRY_NAME }}.azurecr.io
+          container-registry-username: ${{ secrets.ACR_USERNAME }}
+          container-registry-password: ${{ secrets.ACR_PASSWORD }}
+          secret-name: registry-connection
+          namespace: ${{ env.NAMESPACE }}
+
+      - name: Deploy
+        run: |
+          kubectl apply -f deployment.yaml
+          kubectl apply -f service.yaml
+          kubectl apply -f ingress.yaml

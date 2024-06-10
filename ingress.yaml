@@ -1,0 +1,21 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: express-ingress
+spec:
+  ingressClassName: azure-application-gateway
+  tls:
+    - hosts:
+      - rana093.seliseassessment.com
+      secretName: selise-assignment-secret
+  rules:
+  - host: rana093.seliseassessment.com
+    http:
+      paths:
+        - path: /
+          backend:
+            service: 
+              name: express-app-service
+              port: 
+                number: 80
+          pathType: Exact
